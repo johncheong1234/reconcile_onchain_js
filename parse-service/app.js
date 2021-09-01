@@ -375,7 +375,7 @@ function chunkArrayInGroups(arr, size) {
 }
 
 app.get('/update_status_complex',(req,res)=>{
-  axios.get('http://localhost:3069/reconcile').then(async(resp)=>{
+  axios.get('http://localhost:3000/reconcile').then(async(resp)=>{
 
     const failed_sgx = resp.data['failed_sgx']
     const failed_primo = resp.data['failed_primo']
@@ -522,7 +522,7 @@ app.get('/update_status_complex',(req,res)=>{
 })
 
 app.get('/create_reconcile_complex',function(request,response){
-	axios.get('http://localhost:3069/reconcile_2').then(async(resp)=>{
+	axios.get('http://localhost:3000/reconcile_2').then(async(resp)=>{
 
     const block_trades = []
 
