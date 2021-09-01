@@ -19,81 +19,6 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-// app.get('/parse_sgx', (req, res) => {
-    
-//     const resulty = xlsx.parse(`${__dirname}/sgx.xlsx`);
-//     // console.log(result)
-
-//     var result = resulty[0]['data'].slice(1)
-
-//     for(const i of result){
-  
-//       const new_i = i[2].split('')
-//       new_i.splice(3,0,'.')
-//       for(var k=1;k>=0;k--){
-//         if(new_i[k]=='0'){
-//           new_i.splice(k,1)
-//         }
-//       }
-//       const string_i = new_i.join("")
-//       i.splice(2,1,parseFloat(string_i))
-
-//       const old_date = i[4].toString()
-//       const first_2_date = old_date.substring(0,2)
-//       const middle_2_date = old_date.substring(2,4)
-//       const last_2_date = old_date.substring(4)
-//       const new_date = last_2_date.concat(middle_2_date,first_2_date)
-
-//       i.splice(4,1,new_date)
-
-      
-//     }
-//     res.send(result)
-
-// })
-
-// app.get('/parse_primo', (req, res) => {
-    
-//     const result = xlsx.parse(`${__dirname}/primo.xlsx`);
-//     console.log(result)
-//     res.send(result[0]['data'].slice(1))
-
-
-// })
-
-// app.post('/upload_sgx_complex',(req,res)=>{
-
-//   let sgx;
-//   let uploadPath;
-
-//   if (!req.files || Object.keys(req.files).length === 0) {
-//     return res.status(400).send('No files were uploaded.');
-//   }
-
-//   uploadPath = __dirname + '/' + 'sgx.xlsx';
-//   sgx = req.files.myFile;
-
-  
-//   sgx.mv(uploadPath, function(err) {
-//     if (err)
-//       return res.status(500).send(err);
-
-//     // res.send('File uploaded!');
-//     axios.get('http://localhost:3002/parse_sgx').then(resp => {
-
-//       console.log(resp.data);
-  
-//       var sgx_data = resp.data
-  
-//       axios.post('http://localhost:3000/create_sgx', sgx_data)
-//         .then(function (response) {
-//           console.log(response);
-//           res.send(response.data)
-//         })
-//   });
-//   });
-// })
-
 async function uploadData(url, stringData) {
   let resp = await axios({
     method: 'post',
@@ -121,7 +46,6 @@ app.post('/upload_sgx_dict_complex',(req,res)=>{
   uploadPath = __dirname + '/' + 'sgx.xlsx';
   sgx = req.files.myFile;
 
-  
   sgx.mv(uploadPath, function(err) {
     if (err)
       return res.status(500).send(err);
@@ -665,3 +589,78 @@ app.get('/reconcile_orchestrate',async(req,res)=>{
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 })
+
+// app.get('/parse_sgx', (req, res) => {
+    
+//     const resulty = xlsx.parse(`${__dirname}/sgx.xlsx`);
+//     // console.log(result)
+
+//     var result = resulty[0]['data'].slice(1)
+
+//     for(const i of result){
+  
+//       const new_i = i[2].split('')
+//       new_i.splice(3,0,'.')
+//       for(var k=1;k>=0;k--){
+//         if(new_i[k]=='0'){
+//           new_i.splice(k,1)
+//         }
+//       }
+//       const string_i = new_i.join("")
+//       i.splice(2,1,parseFloat(string_i))
+
+//       const old_date = i[4].toString()
+//       const first_2_date = old_date.substring(0,2)
+//       const middle_2_date = old_date.substring(2,4)
+//       const last_2_date = old_date.substring(4)
+//       const new_date = last_2_date.concat(middle_2_date,first_2_date)
+
+//       i.splice(4,1,new_date)
+
+      
+//     }
+//     res.send(result)
+
+// })
+
+// app.get('/parse_primo', (req, res) => {
+    
+//     const result = xlsx.parse(`${__dirname}/primo.xlsx`);
+//     console.log(result)
+//     res.send(result[0]['data'].slice(1))
+
+
+// })
+
+// app.post('/upload_sgx_complex',(req,res)=>{
+
+//   let sgx;
+//   let uploadPath;
+
+//   if (!req.files || Object.keys(req.files).length === 0) {
+//     return res.status(400).send('No files were uploaded.');
+//   }
+
+//   uploadPath = __dirname + '/' + 'sgx.xlsx';
+//   sgx = req.files.myFile;
+
+  
+//   sgx.mv(uploadPath, function(err) {
+//     if (err)
+//       return res.status(500).send(err);
+
+//     // res.send('File uploaded!');
+//     axios.get('http://localhost:3002/parse_sgx').then(resp => {
+
+//       console.log(resp.data);
+  
+//       var sgx_data = resp.data
+  
+//       axios.post('http://localhost:3000/create_sgx', sgx_data)
+//         .then(function (response) {
+//           console.log(response);
+//           res.send(response.data)
+//         })
+//   });
+//   });
+// })

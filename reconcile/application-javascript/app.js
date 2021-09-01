@@ -208,6 +208,24 @@ var main = async function (req, res, next){
 
 app.use(main)
 
+app.get('/read_unique_isin', (req, res) => {
+	//read entire chain
+	// res.send(req.all)
+	contract_reconcile.evaluateTransaction('ReturnUniqueISIN').then(function(value){
+		const all = value.toString()
+		res.send(all)
+	})
+})
+
+app.post('/return_primo_isin',function(request,response){
+
+
+	console.log(JSON.stringify(request.body))
+	response.send('Reconcile blocks made')
+	
+	
+})
+
 app.get('/read_sgx', (req, res) => {
 	//read entire chain
 	// res.send(req.all)

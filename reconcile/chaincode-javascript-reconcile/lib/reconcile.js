@@ -11,14 +11,67 @@ const { Contract } = require('fabric-contract-api');
 
 class Reconcile extends Contract {
 
-    async InitLedger(ctx) {
-
-        let sgx = await ctx.stub.invokeChaincode("sgx", ["GetAllAssets"], "mychannel");
+    async ReturnUniqueISIN(ctx){
+        let sgx = await ctx.stub.invokeChaincode("sgx", ["ReturnPending"], "mychannel");
         if (sgx.status !== 200) {
             throw new Error(sgx.message);
         }
 
-        let primo = await ctx.stub.invokeChaincode("primo", ["GetAllAssets"], "mychannel");
+        const sgx_assets = JSON.parse(sgx.payload.toString('utf8'));
+
+        const ISIN = []
+
+        for(var i=0; i<sgx_assets.length; i++){
+            if(!ISIN.includes(sgx_assets[i]['Record']['ISIN'])){
+                ISIN.push(sgx_assets[i]['Record']['ISIN'])
+            }
+        }
+
+        return ISIN;
+    }
+
+    async ReturnPrimoWithISIN(ctx, ISINList){
+        let primo = await ctx.stub.invokeChaincode("primo", ["ReturnPending"], "mychannel");
+        if (primo.status !== 200) {
+            throw new Error(primo.message);
+        }
+
+        const primo_assets = JSON.parse(primo.payload.toString('utf8'));
+        const parsed_primo_assets = []
+
+        var includes = false;
+
+        for(var j=0; j<primo_assets.length; j++){
+            if(primo_assets[j]['Record']['Status']=='pending'){
+            for(var i=0; i<ISINList.length; i++){
+                if(primo_assets[j]['Record']['ISIN'].includes(ISINList[i])){
+                includes = true;
+                parsed_primo_assets.push({'ID':primo_assets[j]['Record']['ID'],'Quantity':primo_assets[j]['Record']['Quantity'],'Execution_Date':primo_assets[j]['Record']['Execution_Date'],'ISIN':ISINList[i],'RT':primo_assets[j]['Record']['RT'],'CLINO':primo_assets[j]['Record']['CLINO'],'Settlement_price':primo_assets[j]['Record']['Settlement_price']})
+                break
+                }
+                
+            }
+
+            if(includes == true){
+                includes = false;
+            }else{
+                parsed_primo_assets.push({'ID':primo_assets[j]['Record']['ID'],'Quantity':primo_assets[j]['Record']['Quantity'],'Execution_Date':primo_assets[j]['Record']['Execution_Date'],'ISIN':primo_assets[j]['Record']['ISIN'],'RT':primo_assets[j]['Record']['RT'],'CLINO':primo_assets[j]['Record']['CLINO'],'Settlement_price':primo_assets[j]['Record']['Settlement_price']})
+            }
+        
+        }
+        }
+
+        return parsed_primo_assets
+    }
+
+    async InitLedger(ctx) {
+
+        let sgx = await ctx.stub.invokeChaincode("sgx", ["ReturnPending"], "mychannel");
+        if (sgx.status !== 200) {
+            throw new Error(sgx.message);
+        }
+
+        let primo = await ctx.stub.invokeChaincode("primo", ["ReturnPending"], "mychannel");
         if (primo.status !== 200) {
             throw new Error(primo.message);
         }
@@ -303,7 +356,7 @@ class Reconcile extends Contract {
     }
 
     async reconcile_2(ctx) {
-        let sgx = await ctx.stub.invokeChaincode("sgx", ["GetAllAssets"], "mychannel");
+        let sgx = await ctx.stub.invokeChaincode("sgx", ["ReturnPending"], "mychannel");
         if (sgx.status !== 200) {
             throw new Error(sgx.message);
         }
