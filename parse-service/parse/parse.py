@@ -56,7 +56,7 @@ def parse_primo():
 
     for i in dfdict:
         i['RT'] = i['BUY_SELL']
-        i['ISIN'] = i['REUT']
+        i['ISIN'] = i['REUT'][1:]
         i['Quantity'] = i['QUANTITY']
         i['Alpha_status'] = i['STATUS']
         i['Settlement_Price'] = i['SETTLEMENT_PRICE']
@@ -78,7 +78,7 @@ def parse_primo_batch():
 
     for i in dfdict:
         i['RT'] = i['BUY_SELL']
-        i['ISIN'] = i['REUT']
+        i['ISIN'] = i['REUT'][1:]
         i['Quantity'] = i['QUANTITY']
         i['Alpha_status'] = i['STATUS']
         i['Settlement_Price'] = i['SETTLEMENT_PRICE']

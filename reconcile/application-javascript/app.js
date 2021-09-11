@@ -423,6 +423,61 @@ app.post('/create_primo_array', async(request, response)=>{
 
 });
 
+app.get('/reconcile', async(request, response)=>{
+
+	await contract_sgx.evaluateTransaction('ReturnPending').then(async(value)=>{
+		const all = value.toString()
+
+		await contract_reconcile.submitTransaction('returnSGXDict', all).then(async(value)=>{
+			console.log(value.toString())
+			var sgx_dict = value.toString()
+			// response.send(sgx_dict)
+
+			await contract_primo.evaluateTransaction('ReturnPending').then(async(value)=>{
+				const all = value.toString()
+		
+				await contract_reconcile.submitTransaction('returnPrimoDict', all).then(async(value)=>{
+					console.log(value.toString())
+					var primo_dict = value.toString()
+					// response.send({sgx_dict: sgx_dict,primo_dict: primo_dict})
+					await contract_reconcile.submitTransaction('comparePrimoSGXDict', sgx_dict, primo_dict).then(async(value)=>{
+						console.log(value.toString())
+						response.send(value.toString())
+					})
+				})
+			})
+		})
+	})
+});
+
+
+app.get('/reconcile_long', async(request, response)=>{
+
+	await contract_sgx.evaluateTransaction('ReturnPending').then(async(value)=>{
+		const all = value.toString()
+
+		await contract_reconcile.submitTransaction('returnSGXDict', all).then(async(value)=>{
+			console.log(value.toString())
+			var sgx_dict = value.toString()
+			// response.send(sgx_dict)
+
+			await contract_primo.evaluateTransaction('ReturnPending').then(async(value)=>{
+				const all = value.toString()
+		
+				await contract_reconcile.submitTransaction('returnLongPrimoDict', all).then(async(value)=>{
+					console.log(value.toString())
+					var primo_dict = value.toString()
+					// response.send({sgx_dict: sgx_dict,primo_dict: primo_dict})
+					await contract_reconcile.submitTransaction('comparePrimoSGXDict', sgx_dict, primo_dict).then(async(value)=>{
+						console.log(value.toString())
+						response.send(value.toString())
+					})
+				})
+			})
+		})
+	})
+});
+
 app.post('/create_primo', async(request, response)=>{
 	
 	await contract_primo.evaluateTransaction('GetLength').then(async(value)=>{
@@ -644,21 +699,12 @@ app.post('/delete_primo',function(request,response){
 	response.send("Primo Delete Transaction complete")
 })
 
-//deprecated
-app.get('/reconcile',async(request,response)=>{
-	await contract_reconcile.submitTransaction("InitLedger").then(function(value){
-		response.send(value)
-	}	
-	)
-})
-
-//deprecated
-app.get('/reconcile_2',async(request,response)=>{
-	await contract_reconcile.submitTransaction("reconcile_2").then(function(value){
-		response.send(value)
-	}	
-	)
-})
+// app.get('/reconcile_long',async(request,response)=>{
+// 	await contract_reconcile.submitTransaction("reconcile_long").then(function(value){
+// 		response.send(value)
+// 	}	
+// 	)
+// })
 
 app.post('/create_reconcile',function(request,response){
 	contract_reconcile.evaluateTransaction('GetLength').then(function(value){
@@ -690,3 +736,17 @@ app.get('/read_reconcile', (req, res) => {
 app.listen(port, () => {
 	console.log(`Example app listening at http://localhost:${port}`)
 })
+
+// app.get('/reconcile_2',async(request,response)=>{
+// 	await contract_reconcile.submitTransaction("reconcile_2").then(function(value){
+// 		response.send(value)
+// 	}	
+// 	)
+// })
+
+// app.get('/reconcile',async(request,response)=>{
+// 	await contract_reconcile.submitTransaction("reconcile").then(function(value){
+// 		response.send(value)
+// 	}	
+// 	)
+// })
