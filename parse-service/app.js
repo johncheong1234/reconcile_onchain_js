@@ -10,6 +10,10 @@ var xlsx = require('node-xlsx').default;
 
 const axios = require('axios')
 
+const redis = require("redis");
+const redisClient = redis.createClient();
+const DEFAULT_EXPIRATION = 3000
+
 app.use(fileUpload());
 app.use(express.json({limit: '200mb'}));
 // app.use(express.urlencoded({limit: '200mb'}));
@@ -33,6 +37,48 @@ async function uploadData(url, stringData) {
   console.log("uploadData: response:", resp.data);
   return resp;
 }
+
+app.get('/read_sgx',async(req,res)=>{
+  redisClient.get('sgx',async(error, sgx)=>{
+    if (error) console.error(error)
+    if(sgx != null){
+      res.send(JSON.parse(sgx))
+    }else{
+      const {data} = await axios.get('http://localhost:3000/read_sgx')
+      redisClient.setex('sgx',DEFAULT_EXPIRATION,JSON.stringify(data))
+      res.send(data)
+    }
+  })
+  
+})
+
+app.get('/read_primo',async(req,res)=>{
+  redisClient.get('primo',async(error, primo)=>{
+    if (error) console.error(error)
+    if(primo != null){
+      res.send(JSON.parse(primo))
+    }else{
+      const {data} = await axios.get('http://localhost:3000/read_primo')
+      redisClient.setex('primo',DEFAULT_EXPIRATION,JSON.stringify(data))
+      res.send(data)
+    }
+  })
+  
+})
+
+app.get('/read_reconcile',async(req,res)=>{
+  redisClient.get('reconcile',async(error, reconcile)=>{
+    if (error) console.error(error)
+    if(reconcile != null){
+      res.send(JSON.parse(reconcile))
+    }else{
+      const {data} = await axios.get('http://localhost:3000/read_reconcile')
+      redisClient.setex('reconcile',DEFAULT_EXPIRATION,JSON.stringify(data))
+      res.send(data)
+    }
+  })
+  
+})
 
 app.post('/upload_sgx_dict_complex',(req,res)=>{
 
@@ -89,120 +135,6 @@ app.post('/upload_sgx_dict_complex',(req,res)=>{
   });
 })
 
-
-// app.post('/upload_sgx_dict_complex',(req,res)=>{
-
-//   let sgx;
-//   let uploadPath;
-
-//   if (!req.files || Object.keys(req.files).length === 0) {
-//     return res.status(400).send('No files were uploaded.');
-//   }
-
-//   uploadPath = __dirname + '/' + 'sgx.xlsx';
-//   sgx = req.files.myFile;
-
-  
-//   sgx.mv(uploadPath, function(err) {
-//     if (err)
-//       return res.status(500).send(err);
-
-//     // res.send('File uploaded!');
-//     axios.get('http://localhost:3002/parse_sgx').then(resp => {
-
-//       console.log(resp.data);
-  
-//       var sgx_data = resp.data
-  
-//       var sgx_dict_data = []
-
-//       for(var i=0;i<sgx_data.length;i++){
-//         var sgx_dict = {}
-//         sgx_dict['RT'] = sgx_data[i][0]
-//         sgx_dict['CLINO'] = sgx_data[i][1]
-//         sgx_dict['Settlement_price'] = sgx_data[i][2]
-//         sgx_dict['Quantity'] = sgx_data[i][3]
-//         sgx_dict['Execution_date'] = sgx_data[i][4]
-//         sgx_dict['ISIN'] = sgx_data[i][5]
-//         sgx_dict['Owner'] = 'SGX'
-//         sgx_dict['Status'] = 'pending'
-//         sgx_dict['Block_ID'] = 'NIL'
-//         sgx_dict_data.push(sgx_dict)
-//       }
-
-//       axios.post('http://localhost:3000/create_sgx_array', sgx_dict_data)
-//         .then(function (response) {
-//           console.log(response);
-//           res.send(response.data)
-//         })
-//   });
-//   });
-// })
-
-// app.post('/upload_primo_dict_complex',(req,res)=>{
-
-//   let primo;
-//   let uploadPath;
-
-//   if (!req.files || Object.keys(req.files).length === 0) {
-//     return res.status(400).send('No files were uploaded.');
-//   }
-
-//   uploadPath = __dirname + '/' + 'primo.xlsx';
-//   primo = req.files.myFile;
-
-  
-//   primo.mv(uploadPath, function(err) {
-//     if (err)
-//       return res.status(500).send(err);
-
-//     // res.send('File uploaded!');
-//     axios.get('http://localhost:3002/parse_primo').then(resp => {
-
-//       console.log(resp.data);
-  
-//       var primo_data = resp.data
-  
-//       var primo_dict_data = []
-
-//       for(var i=0;i<primo_data.length;i++){
-//         var primo_dict = {}
-//         primo_dict['Request_Ty'] = primo_data[i][0]
-//         primo_dict['Trade_ID'] = primo_data[i][1]
-//         primo_dict['Trade_Version_ID'] = primo_data[i][2]
-//         primo_dict['Source_System_ID'] = primo_data[i][3]
-//         primo_dict['Source_System'] = primo_data[i][4]
-//         primo_dict['RT'] = primo_data[i][5]
-//         primo_dict['ISIN'] = primo_data[i][6]
-//         primo_dict['FII'] = primo_data[i][7]
-//         primo_dict['Book'] = primo_data[i][8]
-//         primo_dict['Counterparty'] = primo_data[i][9]
-//         primo_dict['Quantity'] = primo_data[i][10]
-//         primo_dict['Settlement_price'] = primo_data[i][11]
-//         primo_dict['Execution_date'] = primo_data[i][12]
-//         primo_dict['Settlement_Date'] = primo_data[i][13]
-//         primo_dict['Alpha_status'] = primo_data[i][14]
-//         primo_dict['Pricing_Currency'] = primo_data[i][15]
-//         primo_dict['Principal'] = primo_data[i][16]
-//         primo_dict['Order_ID'] = primo_data[i][17]
-//         primo_dict['Order_Slang'] = primo_data[i][18]
-//         primo_dict['CLINO'] = primo_data[i][19]
-//         primo_dict['Owner'] = 'Primo'
-//         primo_dict['Status'] = 'pending'
-//         primo_dict['Block_ID'] = 'NIL'
-//         primo_dict_data.push(primo_dict)
-//       }
-
-//       axios.post('http://localhost:3000/create_primo_array', primo_dict_data)
-//         .then(function (response) {
-//           console.log(response);
-//           res.send(response.data)
-//         })
-
-//   });
-//   });
-// })
-
 app.post('/upload_primo_dict_complex',async(req,res)=>{
 
   let primo;
@@ -231,64 +163,9 @@ app.post('/upload_primo_dict_complex',async(req,res)=>{
       }
 
       res.send('Assets Created')
-
-      // console.log(resp.data);
-      // await uploadData("http://localhost:3000/create_primo_array", resp.data).then(function (response) {
-      //    console.log(response);
-      //     res.send(response.data)
-      //   })
-
-      // axios.post('http://localhost:3000/create_primo_array', resp.data)
-      //   .then(function (response) {
-      //     console.log(response);
-      //     res.send(response.data)
-      //   })
-    //   axios({
-    //     method: 'post',
-    //     url: 'http://localhost:3000/create_primo_array',
-    //     data: resp.data,
-    //     maxContentLength: 100000000,
-    //     maxBodyLength: 1000000000
-    //   }).then(function (response) {
-    //  console.log(response);
-    //         res.send(response.data)
-    //     })
-
   });
   });
 })
-
-// app.post('/upload_primo_complex',(req,res)=>{
-
-//   let primo;
-//   let uploadPath;
-
-//   if (!req.files || Object.keys(req.files).length === 0) {
-//     return res.status(400).send('No files were uploaded.');
-//   }
-
-//   uploadPath = __dirname + '/' + 'primo.xlsx';
-//   primo = req.files.myFile;
-
-  
-//   primo.mv(uploadPath, function(err) {
-//     if (err)
-//       return res.status(500).send(err);
-
-//       axios.get('http://localhost:3002/parse_primo').then(resp => {
-
-//         console.log(resp.data);
-    
-//         var sgx_data = resp.data
-    
-//         axios.post('http://localhost:3000/create_primo', sgx_data)
-//           .then(function (response) {
-//             console.log(response);
-//             res.send(response.data)
-//           })
-//     });
-//   });
-// })
 
 function chunkArrayInGroups(arr, size) {
   var myArray = [];
@@ -662,5 +539,150 @@ app.listen(port, () => {
 //           res.send(response.data)
 //         })
 //   });
+//   });
+// })
+
+// app.post('/upload_sgx_dict_complex',(req,res)=>{
+
+//   let sgx;
+//   let uploadPath;
+
+//   if (!req.files || Object.keys(req.files).length === 0) {
+//     return res.status(400).send('No files were uploaded.');
+//   }
+
+//   uploadPath = __dirname + '/' + 'sgx.xlsx';
+//   sgx = req.files.myFile;
+
+  
+//   sgx.mv(uploadPath, function(err) {
+//     if (err)
+//       return res.status(500).send(err);
+
+//     // res.send('File uploaded!');
+//     axios.get('http://localhost:3002/parse_sgx').then(resp => {
+
+//       console.log(resp.data);
+  
+//       var sgx_data = resp.data
+  
+//       var sgx_dict_data = []
+
+//       for(var i=0;i<sgx_data.length;i++){
+//         var sgx_dict = {}
+//         sgx_dict['RT'] = sgx_data[i][0]
+//         sgx_dict['CLINO'] = sgx_data[i][1]
+//         sgx_dict['Settlement_price'] = sgx_data[i][2]
+//         sgx_dict['Quantity'] = sgx_data[i][3]
+//         sgx_dict['Execution_date'] = sgx_data[i][4]
+//         sgx_dict['ISIN'] = sgx_data[i][5]
+//         sgx_dict['Owner'] = 'SGX'
+//         sgx_dict['Status'] = 'pending'
+//         sgx_dict['Block_ID'] = 'NIL'
+//         sgx_dict_data.push(sgx_dict)
+//       }
+
+//       axios.post('http://localhost:3000/create_sgx_array', sgx_dict_data)
+//         .then(function (response) {
+//           console.log(response);
+//           res.send(response.data)
+//         })
+//   });
+//   });
+// })
+
+// app.post('/upload_primo_dict_complex',(req,res)=>{
+
+//   let primo;
+//   let uploadPath;
+
+//   if (!req.files || Object.keys(req.files).length === 0) {
+//     return res.status(400).send('No files were uploaded.');
+//   }
+
+//   uploadPath = __dirname + '/' + 'primo.xlsx';
+//   primo = req.files.myFile;
+
+  
+//   primo.mv(uploadPath, function(err) {
+//     if (err)
+//       return res.status(500).send(err);
+
+//     // res.send('File uploaded!');
+//     axios.get('http://localhost:3002/parse_primo').then(resp => {
+
+//       console.log(resp.data);
+  
+//       var primo_data = resp.data
+  
+//       var primo_dict_data = []
+
+//       for(var i=0;i<primo_data.length;i++){
+//         var primo_dict = {}
+//         primo_dict['Request_Ty'] = primo_data[i][0]
+//         primo_dict['Trade_ID'] = primo_data[i][1]
+//         primo_dict['Trade_Version_ID'] = primo_data[i][2]
+//         primo_dict['Source_System_ID'] = primo_data[i][3]
+//         primo_dict['Source_System'] = primo_data[i][4]
+//         primo_dict['RT'] = primo_data[i][5]
+//         primo_dict['ISIN'] = primo_data[i][6]
+//         primo_dict['FII'] = primo_data[i][7]
+//         primo_dict['Book'] = primo_data[i][8]
+//         primo_dict['Counterparty'] = primo_data[i][9]
+//         primo_dict['Quantity'] = primo_data[i][10]
+//         primo_dict['Settlement_price'] = primo_data[i][11]
+//         primo_dict['Execution_date'] = primo_data[i][12]
+//         primo_dict['Settlement_Date'] = primo_data[i][13]
+//         primo_dict['Alpha_status'] = primo_data[i][14]
+//         primo_dict['Pricing_Currency'] = primo_data[i][15]
+//         primo_dict['Principal'] = primo_data[i][16]
+//         primo_dict['Order_ID'] = primo_data[i][17]
+//         primo_dict['Order_Slang'] = primo_data[i][18]
+//         primo_dict['CLINO'] = primo_data[i][19]
+//         primo_dict['Owner'] = 'Primo'
+//         primo_dict['Status'] = 'pending'
+//         primo_dict['Block_ID'] = 'NIL'
+//         primo_dict_data.push(primo_dict)
+//       }
+
+//       axios.post('http://localhost:3000/create_primo_array', primo_dict_data)
+//         .then(function (response) {
+//           console.log(response);
+//           res.send(response.data)
+//         })
+
+//   });
+//   });
+// })
+
+// app.post('/upload_primo_complex',(req,res)=>{
+
+//   let primo;
+//   let uploadPath;
+
+//   if (!req.files || Object.keys(req.files).length === 0) {
+//     return res.status(400).send('No files were uploaded.');
+//   }
+
+//   uploadPath = __dirname + '/' + 'primo.xlsx';
+//   primo = req.files.myFile;
+
+  
+//   primo.mv(uploadPath, function(err) {
+//     if (err)
+//       return res.status(500).send(err);
+
+//       axios.get('http://localhost:3002/parse_primo').then(resp => {
+
+//         console.log(resp.data);
+    
+//         var sgx_data = resp.data
+    
+//         axios.post('http://localhost:3000/create_primo', sgx_data)
+//           .then(function (response) {
+//             console.log(response);
+//             res.send(response.data)
+//           })
+//     });
 //   });
 // })

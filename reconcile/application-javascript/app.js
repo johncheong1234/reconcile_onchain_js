@@ -35,8 +35,6 @@ var contract_sgx;
 var contract_primo;
 var contract_reconcile;
 
-
-
 function prettyJSONString(inputString) {
 	return JSON.stringify(JSON.parse(inputString), null, 2);
 }
