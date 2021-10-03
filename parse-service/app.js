@@ -12,7 +12,7 @@ const axios = require('axios')
 
 const redis = require("redis");
 const redisClient = redis.createClient();
-const DEFAULT_EXPIRATION = 3000
+const DEFAULT_EXPIRATION = 30
 
 app.use(fileUpload());
 app.use(express.json({limit: '200mb'}));
