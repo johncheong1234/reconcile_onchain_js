@@ -241,6 +241,28 @@ class Reconcile extends Contract {
 
        return sgx_dict
     }
+
+    async returnLongSGXDict(ctx, sgx) {
+
+        const parsed_sgx_assets = JSON.parse(sgx);     
+
+        const sgx_dict = {}
+
+        for(var i=0; i<parsed_sgx_assets.length; i++){
+            var elements = [parsed_sgx_assets[i]['Record']['ISIN'],parsed_sgx_assets[i]['Record']['RT'],parsed_sgx_assets[i]['Record']['CLINO'],parsed_sgx_assets[i]['Record']['Settlement_price'],parsed_sgx_assets[i]['Record']['Execution_Date']]
+            var sgx_string = elements.join('_');
+            var id_q = [parsed_sgx_assets[i]['Record']['ID'],parsed_sgx_assets[i]['Record']['Quantity']]
+            var id_q_string = id_q.join('_')
+            if(sgx_dict[sgx_string]){
+                sgx_dict[sgx_string]['Quantity'] += parseInt(parsed_sgx_assets[i]['Record']['Quantity']);
+                sgx_dict[sgx_string]['ID_list'].push(id_q_string)
+            }else{
+                sgx_dict[sgx_string] = {'Quantity':parseInt(parsed_sgx_assets[i]['Record']['Quantity']), 'ID_list':[id_q_string]};
+            }
+        }
+
+       return sgx_dict
+    }
     
     async returnPrimoDict(ctx, primo) {
 

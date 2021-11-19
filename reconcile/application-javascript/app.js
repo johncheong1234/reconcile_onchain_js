@@ -454,7 +454,7 @@ app.get('/reconcile_long', async(request, response)=>{
 	await contract_sgx.evaluateTransaction('ReturnPending').then(async(value)=>{
 		const all = value.toString()
 
-		await contract_reconcile.submitTransaction('returnSGXDict', all).then(async(value)=>{
+		await contract_reconcile.submitTransaction('returnLongSGXDict', all).then(async(value)=>{
 			console.log(value.toString())
 			var sgx_dict = value.toString()
 			// response.send(sgx_dict)

@@ -7,3 +7,4 @@ os.system("./network.sh deployCC -ccn primo -ccp ../reconcile/chaincode-javascri
 os.system("./network.sh deployCC -ccn reconcile -ccp ../reconcile/chaincode-javascript-reconcile/ -ccl javascript")
 # os.system("./network.sh deployCC -ccn reconcile_java -ccp ../reconcile/chaincode-java-reconcile/ -ccl java")
 
+
